@@ -1,0 +1,19 @@
+--- 
+routes: 
+  /about: 
+    get: 
+      body: "<html><body><h1>About Us!</h1></html>"
+      content-type: text/html
+      response-code: 200
+  /api/users: 
+    get: 
+      body: |
+          {
+            "id": 123
+            "name": "tyndyll"
+          }
+      content-type: application/json
+      response-code: 200
+    post: 
+      content-type: text/html
+
