@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"net/http/httputil"
+	"net/url"
 
 	"github.com/tyndyll/mocksrv/adapters"
 	"github.com/tyndyll/mocksrv/usecases"
@@ -13,11 +15,10 @@ import (
 var (
 	echoFlag bool
 	portFlag int
-	jsonPath string
 )
 
 func init() {
-	flag.BoolVar(&echoFlag, "echo", true, "echo request")
+	flag.BoolVar(&echoFlag, "echo", false, "echo request")
 	flag.IntVar(&portFlag, "port", 8000, "port the server should listen on")
 	flag.Parse()
 }
@@ -28,11 +29,24 @@ func main() {
 		log.Fatalln(err)
 	}
 
+	for route, fileServer := range config.FileServers() {
+		fs := http.FileServer(http.Dir(fileServer.Directory))
+		http.Handle(route, http.StripPrefix(route, fs))
+	}
+
+	for route, proxy := range config.Proxy() {
+		remoteURL, err := url.Parse(proxy.Remote)
+		if err != nil {
+			log.Fatalln(err)
+		}
+		http.Handle(route, httputil.NewSingleHostReverseProxy(remoteURL))
+	}
+
 	mapper := &usecases.RouteMapping{
 		RouteRepository: config.RouteRepository(),
 	}
 
-	handler := &adapters.RouteHandler{
+	handler := &adapters.StrictRouteHandler{
 		Mapping: mapper,
 	}
 
@@ -41,7 +55,6 @@ func main() {
 		handlerFunc = adapters.EchoMiddleware(handlerFunc)
 	}
 	http.Handle(`/`, handlerFunc)
-	http.ListenAndServe(fmt.Sprintf(":%d", portFlag), nil)
 
-	//log.Printf("%+v \n", repo.Routes["/api/users"].Get.ReponseBody)
+	http.ListenAndServe(fmt.Sprintf(":%d", portFlag), nil)
 }

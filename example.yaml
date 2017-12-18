@@ -16,4 +16,14 @@ routes:
       response-code: 200
     post: 
       content-type: text/html
+  /healthcheck:
+    get:
+      response-code: 204
 
+files:
+  /static/:
+    directory: ./assets
+
+proxy:
+  /google:
+    remote: https://google.com

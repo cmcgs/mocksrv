@@ -15,11 +15,11 @@ type RouteMapping interface {
 	GetConfig(string) (*domain.RouteConfig, error)
 }
 
-type RouteHandler struct {
+type StrictRouteHandler struct {
 	Mapping RouteMapping
 }
 
-func (handler *RouteHandler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
+func (handler *StrictRouteHandler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	config, err := handler.Mapping.GetConfig(req.URL.Path)
 
 	if err != nil {
@@ -50,7 +50,7 @@ func (handler *RouteHandler) ServeHTTP(w http.ResponseWriter, req *http.Request)
 	w.Write([]byte(response.Body))
 }
 
-func (handler *RouteHandler) getResponse(config *domain.RouteConfig, method string) *domain.Response {
+func (handler *StrictRouteHandler) getResponse(config *domain.RouteConfig, method string) *domain.Response {
 	switch method {
 	case http.MethodGet:
 		return config.Get
