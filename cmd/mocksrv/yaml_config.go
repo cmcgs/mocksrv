@@ -4,23 +4,32 @@ import (
 	"io/ioutil"
 	"os"
 
-	"fmt"
 	"github.com/tyndyll/mocksrv/domain"
 	"github.com/tyndyll/mocksrv/infrastructure/repositories"
 	"gopkg.in/yaml.v2"
 )
 
 type YAMLConfig struct {
-	Paths map[string]*domain.RouteConfig `yaml:"routes"`
+	Routes        map[string]*domain.RouteConfig      `yaml:"routes"`
+	FileServerMap map[string]*domain.FileServerConfig `yaml:"files"`
+	ProxyMap      map[string]*domain.ProxyConfig      `yaml:"proxy"`
 }
 
 func (config *YAMLConfig) RouteRepository() domain.RouteRepository {
 	return &repositories.MemoryRouteRepository{
-		RouteMap: config.Paths,
+		RouteMap: config.Routes,
 	}
 }
 
-func configFromYAML(path string) (Config, error) {
+func (config *YAMLConfig) FileServers() map[string]*domain.FileServerConfig {
+	return config.FileServerMap
+}
+
+func (config *YAMLConfig) Proxy() map[string]*domain.ProxyConfig {
+	return config.ProxyMap
+}
+
+func configFromYAML(path string) (domain.Config, error) {
 	f, err := os.Open(path)
 	if err != nil {
 		return nil, err
@@ -31,10 +40,10 @@ func configFromYAML(path string) (Config, error) {
 		return nil, err
 	}
 
-	fmt.Println(string(data))
 	config := &YAMLConfig{}
 	if err := yaml.Unmarshal(data, &config); err != nil {
 		return nil, err
 	}
+
 	return config, nil
 }

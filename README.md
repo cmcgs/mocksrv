@@ -60,8 +60,32 @@ Usage of mocksrv:
 A YAML configuration file must be passed or the server will not start.
 
 
-### Config.yaml Syntax
-Configuration for the mocksrv is provided via a YAML file. It is used to define the route, method and the appopriate response to a request
+### Config YAML Syntax
+The configuration for mocksrv is provided via a YAML file, defining _routes_, _directories_ and _proxys_.
+
+| *Section Name* | *Description* |
+| -------------- | ------------- |
+| routes | Requests to these routes should return the response as dictated by the user |
+| directories | Any request to these routes will serve static content from the filesystem. |
+| proxys | A request to a proxy route will be forwarded on to a remote URL |
+
+The base underlying configuration to these sections is similar - a list of endpoints that can then be configured based up its type. The most basic example of this can look like
+
+```
+routes:
+  /path/to/somewhere:
+    # route configuration. See below
+directories:
+  /path/to/somewhere/else:
+    # directory configuration. See below
+proxy:
+  /path/to/nowhere:
+    # proxy configuration. See below
+
+```
+
+#### routes
+Routes con
 
 | *Field Name* | *Description* |
 | ------------ | ------------- |
@@ -88,3 +112,16 @@ Configuration for the mocksrv is provided via a YAML file. It is used to define 
     ]
 }
 ```
+
+## TODO:
+
+* Add Tests
+* Finish this README
+* Enhance Routes
+   * CORS Support
+   * Provide Auth Validation (string matching)
+* Add a certificate option which would spin up the service with SSL
+* Provide more configuration examples
+* Finalise Logging Format
+* Provide a SIGHUP handler on the service to reload config changes
+* Provide a web interface, including YAML generator?
